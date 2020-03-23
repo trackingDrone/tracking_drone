@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<!--arg name="yaw_origin_" default="-3.134"/-->
+	<!--arg name="Boundary" default="true"/-->
+	<!--arg name="obstacle_avoidance" default="true"/-->
+
+  	<node pkg="iarc_missions" name="iarc_mission_node" type="iarc_mission_node" output="screen">
+    	<param name="horizon_step_ahead" type="double" value="1"/>
+        <param name="horizon_step_left" type="double" value="1"/>
+    	<param name="vertical_step" type="double" value="0.5"/>
+    	<param name="time_step_up" type="double" value="40"/>
+    	<param name="time_step_clockwise" type="double" value="30"/>
+        <param name="time_step_ahead" type="double" value="120"/>
+        <param name="time_step_left" type="double" value="50"/>		
+        <param name="yaw_step" type="double" value="0.8"/>
+        <param name="control_state" type="int" value="1"/>
+
+    </node>
+  	
+    <include file="$(find commu_node)/launch/commu_node.launch"/>
+    <!-- laser_detect -->    
+    <include file="$(find obstacle_avoidance)/launch/obstacle-avoidance.launch"/>
+    
+	<!-- sdk_manifold -->
+    <include file="$(find dji_sdk)/launch/sdk_TX2_1.launch"/>
+
+   <!--include file="$(find usb_cam)/launch/usb_cam-test.launch"/-->
+    
+	<!--node name="record" pkg="rosbag" type="record" args="-a -o /home/guojiaxin/OSDK_SRC807/rosbag/quad_rosbag"/-->
+
+
+</launch> 
+
