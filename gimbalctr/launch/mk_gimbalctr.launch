@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <master auto="start"/>
+
+  <!-- Run gimbal control -->
+  <node name="gimbalctr" pkg="mk_gimbalctr" type="mk_gimbalctr" output="screen">
+  
+      <param name="stepRoll" type="double" value="5.0"/>
+      <param name="stepPitch" type="double" value="5.0"/>
+      <param name="stepYaw" type="double" value="5.0"/>
+      <param name="sleepTime" type="double" value="0.15"/>
+      <param name="offset" type="double" value="0.12"/>
+
+      <param name="rollOffset" type="int" value="100"/>
+      <param name="pitchOffset" type="int" value="90"/>
+      <param name="yawOffset" type="int" value="54"/>
+      
+  </node>
+  
+</launch>
+

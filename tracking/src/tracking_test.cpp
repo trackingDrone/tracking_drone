@@ -239,6 +239,13 @@ void Tracking_Melon::mainloop() {
             circle(frame, history_pos[j][i], 3, colors[colors_flag[j]], -1);
           }
         }
+        roi_pos.dx = (history_pos[0][0].x - img_width / 2) / (img_width / 2);
+        roi_pos.dy = (history_pos[0][0].y - img_height / 2) / (img_height / 2);
+        roi_pos.width = cars[0].bbox.width;
+        roi_pos.height = cars[0].bbox.height;
+        roi_pos.detectornot = true;
+        roi_pos.x = history_pos[0][0].x;
+        roi_pos.y = history_pos[0][0].y;
         if_track.data = 1;
         imshow(winName, frame);
         cv::waitKey(10);
@@ -250,6 +257,8 @@ void Tracking_Melon::mainloop() {
           if_track.data = 0;
           ok = 0;
         }
+        if_track_pub.publish(if_track);
+        roi_pub.publish(roi_pos);
         // if(!ok){
         //    for (auto j = 0; j < trackers.getObjects().size(); j++) {
         //      cars[j].bbox=trackers.getObjects()[j];
@@ -265,6 +274,5 @@ void Tracking_Melon::mainloop() {
       obj.clear();
       // loop_rate_class.sleep();
     }
-    if_track_pub.publish(if_track);
   }
 }

@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="dist_detect" type="dist_detect.py" name="dist_detect" output="screen">
+	</node>
+</launch>
