@@ -1,0 +1,17 @@
+yolo_model:
+
+  config_file:
+    name: yolov3-tiny_dancer-2.12.cfg
+  weight_file:
+    name: yolov3-tiny_dancer-2.12.weights
+  threshold:
+    value: 0.7
+  detection_classes:
+    names:
+      - ball
+      - goal
+      - robot
+      - T corner
+      - L corner
+      - X corner
+      - penalty marks
