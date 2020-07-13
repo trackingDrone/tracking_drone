@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+    <!-- sdk_manifold -->
+    <include file="$(find dji_sdk)/launch/sdk_TX2_1.launch"/>
+
+    <node pkg="iarc_missions" name="iarc_mission_node" type="iarc_mission_node" output="screen">
+    	<param name="horizon_step_ahead" type="double" value="1"/>
+        <param name="horizon_step_left" type="double" value="1"/>
+    	<param name="vertical_step" type="double" value="0.5"/>
+	<param name="little_part" type ="double" value="0.4"/>
+    	<param name="time_step_up" type="double" value="40"/>
+    	<param name="time_step_clockwise" type="double" value="30"/>
+        <param name="time_step_ahead" type="double" value="120"/>
+        <param name="time_step_left" type="double" value="50"/>		
+        <param name="yaw_step" type="double" value="0.8"/>
+        <param name="control_state" type="int" value="1"/>
+
+    </node>
+    
+    <!-- usb_cam -->
+        <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>    
+	<include file="$(find visual_odometry)/launch/tracking_code.launch"/>
+</launch> 
+
