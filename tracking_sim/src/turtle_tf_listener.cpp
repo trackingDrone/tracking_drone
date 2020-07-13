@@ -23,6 +23,11 @@ double d_max=tan(angle_max*D2R)*h;  //保持检测的最大距离
 
 double v_max=2;  //飞机的速度上限
 
+double d_x;              //目标与飞机的x轴距离，飞机坐标系
+double d_y;              //目标与飞机的y轴距离，飞机坐标系
+double v_target;         //目标线速度
+
+
 using namespace Eigen;
 using namespace std;
 
@@ -71,6 +76,18 @@ void poseCallback2(const turtlesim::PoseConstPtr& msg)
 }
 
 
+void TargetPoseCallback(const turtlesim::PoseConstPtr& msg)
+// void TargetPoseCallback(const drone_pos_msg& msg)
+{
+    d_x=msg->x;
+    d_y=msg->y;
+}
+
+void TargetVelCallback(const turtlesim::PoseConstPtr& msg)
+{
+    v_target=sqrt(msg->x*msg->x+msg->y*msg->y);
+}
+
 int main(int argc, char** argv)
 {
 	// 初始化ROS节点
@@ -89,12 +106,18 @@ int main(int argc, char** argv)
 
 	// 创建发布turtle2速度控制指令的发布者
 	ros::Publisher turtle_vel = node.advertise<geometry_msgs::Twist>("/turtle2/cmd_vel", 10);
+    ros::Publisher drone_vel_pub = node.advertise<geometry_msgs::Twist>("/tracking_node/drone_vel", 10);
 
 	//监听目标姿态消息          //接受信息接口修改处
     ros::Subscriber sub1 = node.subscribe("turtle1/pose", 10, &poseCallback1);
 
     //监听飞机姿态信息
     ros::Subscriber sub2 = node.subscribe("turtle2/pose", 10, &poseCallback2);
+
+    //监听目标姿态信息，飞机坐标系坐标
+    ros::Subscriber target_pose_sub = node.subscribe("EKF/taregt_pos", 10, &TargetPoseCallback);
+    //监听目标速度信息
+    ros::Subscriber target_vel_sub = node.subscribe("EKF/taregt_vel", 10, &TargetVelCallback);
 
     //速度指令
     geometry_msgs::Twist vel_msg;
@@ -103,15 +126,12 @@ int main(int argc, char** argv)
     ros::Rate rate(10.0);
 
     double d;                //目标与飞机的距离
-    double d_x;              //目标与飞机的x轴距离，飞机坐标系
-    double d_y;              //目标与飞机的y轴距离，飞机坐标系
     double e_theta;          //目标与飞机的连线的夹角，飞机坐标系
     double e_d;              //距离与检测安全距离之差
-    double v_target;         //目标线速度
-    double v_target_x;       //目标x轴速度，世界坐标系
-    double v_target_y;       //目标y轴速度，世界坐标系
-    double x_target_last=x_target;    //目标上一采样周期的x坐标，世界坐标系
-    double y_target_last=y_target;    //目标上一采样周期的y坐标，世界坐标系
+    // double v_target_x;       //目标x轴速度，世界坐标系
+    // double v_target_y;       //目标y轴速度，世界坐标系
+    // double x_target_last=x_target;    //目标上一采样周期的x坐标，世界坐标系
+    // double y_target_last=y_target;    //目标上一采样周期的y坐标，世界坐标系
     double sample_time=0.1;  //采样时间
     double theta_d;          //目标的速度夹角，飞机坐标系
     double v_x_set;          //飞机速度x指令
@@ -136,34 +156,37 @@ int main(int argc, char** argv)
     while(node.ok())
     {
         ros::spinOnce();
-        v_target_x=(x_target-x_target_last)/sample_time;
-        v_target_y=(y_target-y_target_last)/sample_time;
-        v_target=sqrt(pow((x_target-x_target_last)/sample_time,2)+pow((y_target-y_target_last)/sample_time,2));
-        VB_W<<v_target_x,v_target_y,0;
+        // v_target_x=(x_target-x_target_last)/sample_time;
+        // v_target_y=(y_target-y_target_last)/sample_time;
+        // v_target=sqrt(pow((x_target-x_target_last)/sample_time,2)+pow((y_target-y_target_last)/sample_time,2));
+        // VB_W<<v_target_x,v_target_y,0;
 
-        R_WA=rotate_matrix(theta_UAV);
-        R_WB=rotate_matrix(theta_target);
-        R_AB=R_WA.inverse()*R_WB;
+        // R_WA=rotate_matrix(theta_UAV);
+        // R_WB=rotate_matrix(theta_target);
+        // R_AB=R_WA.inverse()*R_WB;
 
-        P_W_BORG<<x_target,y_target,0;
-        M_temp34<<R_WB,P_W_BORG;
-        T_W_B<<M_temp34,0,0,0,1;//生成TWB
+        // P_W_BORG<<x_target,y_target,0;
+        // M_temp34<<R_WB,P_W_BORG;
+        // T_W_B<<M_temp34,0,0,0,1;//生成TWB
 
-        P_W_AORG<<x_UAV,y_UAV,0;
-        M_temp34<<R_WA,P_W_AORG;
-        T_W_A<<M_temp34,0,0,0,1;//生成TA
+        // P_W_AORG<<x_UAV,y_UAV,0;
+        // M_temp34<<R_WA,P_W_AORG;
+        // T_W_A<<M_temp34,0,0,0,1;//生成TA
 
-        P_W_BORG_temp<<P_W_BORG,1;
-        P_A_BORG=T_W_A.inverse()*P_W_BORG_temp;
+        // P_W_BORG_temp<<P_W_BORG,1;
+        // P_A_BORG=T_W_A.inverse()*P_W_BORG_temp;
 
-        d_x=P_A_BORG(0,0);
-        d_y=P_A_BORG(1,0);
+        // d_x=P_A_BORG(0,0);
+        // d_y=P_A_BORG(1,0);
+
+
+        
         d=sqrt(d_x*d_x+d_y*d_y);
 
-        cout<<"d= "<<d<<"  d_min=  "<<d_min<<"  d_max= "<<d_max<<endl;
+        // cout<<"d= "<<d<<"  d_min=  "<<d_min<<"  d_max= "<<d_max<<endl;
 
         e_d=d-my_E(d);
-        cout<<"ed="<<e_d<<endl;
+        // cout<<"ed="<<e_d<<endl;
 
         VB_A=R_WA.inverse()*VB_W;
 
@@ -173,8 +196,8 @@ int main(int argc, char** argv)
             theta_d=atan2(VB_A(1,0),VB_A(0,0));
 
 
-        x_target_last=x_target;
-        y_target_last=y_target;
+        // x_target_last=x_target;
+        // y_target_last=y_target;
 
 
         if(d_x==0)      //避免分母为0的情况
@@ -185,7 +208,7 @@ int main(int argc, char** argv)
         vel_msg.angular.z = e_theta+k2*v_target/d*sin(theta_d-e_theta); //设置角速度
 
         ROS_INFO("angular:e_theta=%.2f v_target=%.2f d=%.2f theta_d=%.2f  theta_UAV=%.2f",e_theta,v_target,d,theta_d,theta_UAV);
-
+        
         v_x_set=k1*e_d*cos(e_theta)+v_target*cos(theta_d-e_theta)*cos(e_theta); //计算速度x分量
         v_y_set=k1*e_d*sin(e_theta)+v_target*cos(theta_d-e_theta)*sin(e_theta); //计算速度y分量
 
@@ -197,17 +220,19 @@ int main(int argc, char** argv)
         }
 
         if(e_d==0)//在安全距离内，不进行跟踪，只旋转
+        {
             v_x_set=0;
             v_y_set=0;
-
+        }
 
         vel_msg.linear.x=v_x_set;
         vel_msg.linear.y=v_y_set;
 
         turtle_vel.publish(vel_msg);  //输出速度消息
+        drone_vel_pub.publish(vel_msg);  //输出无人机速度，角速度
 
-        ROS_INFO("UAV : v_x=%.2f  v_y=%.2f ",vel_msg.linear.x, vel_msg.linear.y);
-        ROS_INFO(" ");
+        // ROS_INFO("UAV : v_x=%.2f  v_y=%.2f ",vel_msg.linear.x, vel_msg.linear.y);
+        // ROS_INFO(" ");
 
         rate.sleep();
     }

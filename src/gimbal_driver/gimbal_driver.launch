@@ -1,4 +1,0 @@
-<launch>
-	<node pkg="gimbal_driver" type="gimbal_driver.py" name="gimbal_driver" output="screen">
-	</node>
-</launch>

@@ -1,7 +1,0 @@
-<!-- <?xml version="1.0" encoding="utf-8"?> -->
-<launch>
-  <node  name="video_pub" pkg="video_pub" type="video_pub" respawn="false" output="screen">
-  <param name="video_name"         type="string" value="/media/gjx/GJX/video_pic/VID_20190918_223654.mp4"/>  
-
- </node>
-</launch> 
